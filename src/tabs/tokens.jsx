@@ -16,6 +16,8 @@ export const Tokens = ({userOpen, loginFrom, hacks, address}) => {
     const { state } = useContext( AppContext );
     const [nftPreviews, setNftPreviews] = useState({});
     const [nfts, setNfts] = useState(null);
+    const [mynfts, setmyNfts] = useState(null);
+    const [mynftPreviews, setmyNftPreviews] = useState([]);
     const [fetchPromises, setFetchPromises] = useState([]);
 
     //
@@ -33,7 +35,16 @@ export const Tokens = ({userOpen, loginFrom, hacks, address}) => {
                     const res = await fetch(`https://api.opensea.io/api/v1/assets?owner=${address}&limit=${50}`, { headers: { 'X-API-KEY': '6a7ceb45f3c44c84be65779ad2907046', } });
                     const j = await res.json();
                     const {assets} = j;
-                    setNfts(assets);
+                    // setNfts(assets);
+
+                    // Gets bored apes from main net via Moralis NFT API
+                    const res1 = await fetch(`https://deep-index.moralis.io/api/v2/nft/0xBC4CA0EdA7647A8aB7C2061c2E118A18a936f13D?chain=eth&format=decimal&limit=10
+                    `, { headers: { 'X-API-KEY': 'H2SjTrwPQu29K2foKhDUP7d4e9JdNGpWZvNtzvK1IX8XKmgrEB8Q5ix35AzBnZdd', 'accept': 'application/json' } });
+                    const boredApesResult = await res1.json();
+                    const boredApes = boredApesResult.result;
+
+                    setmyNfts(boredApes);
+
 
                 } else if (loginFrom === 'discord') {
 
@@ -63,6 +74,7 @@ export const Tokens = ({userOpen, loginFrom, hacks, address}) => {
         if (nfts) {
 
             for (const nft of nfts) {
+                console.log('nft.image_preview_url', nft.image_preview_url);
 
                 if (!nftPreviews[nft.image_preview_url]) {
 
@@ -71,8 +83,10 @@ export const Tokens = ({userOpen, loginFrom, hacks, address}) => {
                     if (loginFrom === 'metamask') {
 
                         fetch(nft.image_preview_url).then(response => response.blob()).then(imageBlob => {
+                            console.log('imageBlob', imageBlob);
 
                             const imageObjectURL = URL.createObjectURL(imageBlob);
+                            console.log('imageObjectURL', imageObjectURL);
                             nftPreviews[nft.image_preview_url] = imageObjectURL;
                             setNftPreviews(nftPreviews);
 
@@ -96,6 +110,24 @@ export const Tokens = ({userOpen, loginFrom, hacks, address}) => {
 
         }
 
+        if (mynfts) {
+            console.log('mynfts', mynfts);
+            for (const nft of mynfts) {
+                // generates ape image url
+                let imageUrl = 'https://ipfs.io/ipfs/' + JSON.parse(nft.metadata).image.slice(7);
+                if (!mynftPreviews[imageUrl]) {
+                    mynftPreviews[imageUrl] = 'images/object.jpg';
+                    fetch(imageUrl).then(response => response.blob()).then(imageBlob => {
+                        const imageObjectURL = URL.createObjectURL(imageBlob);
+                        mynftPreviews[imageUrl] = imageObjectURL;
+                        setmyNftPreviews(mynftPreviews);
+
+                    }).catch((e) => console.error('error in imageblob generation', e));
+                }
+            }
+            setmyNftPreviews(mynftPreviews);
+        }
+
     });
 
     //
@@ -107,8 +139,11 @@ export const Tokens = ({userOpen, loginFrom, hacks, address}) => {
                 e.stopPropagation();
             }}
         >
-                {(nfts || []).map((nft, i) => {
-                    const {id, asset_contract, hash, name, description} = nft;
+                {(mynfts || []).map((nft, i) => {
+                    // const {id, asset_contract, hash, name, description} = nft;
+                    const {token_id, name, hash} = nft;
+                    let imageUrl = 'https://ipfs.io/ipfs/' + JSON.parse(nft.metadata).image.slice(7);
+
                     // const image_preview_url = hacks.getNftImage(nft);
                     /* if (!image_preview_url) {
                                 console.log('got nft', {nft, hacks, image_preview_url});
@@ -119,11 +154,11 @@ export const Tokens = ({userOpen, loginFrom, hacks, address}) => {
                     return <div className={styles.nft} onDragStart={e => {
                     e.dataTransfer.setData('application/json', JSON.stringify(nft));
                     }} draggable key={i}>
-                    <img src={nftPreviews[nft.image_preview_url] || 'images/object.jpg'} className={styles.preview} />
+                    <img src={mynftPreviews[imageUrl] || 'images/object.jpg'} className={styles.preview} />
                     <div className={styles.wrap}>
                         <div className={styles.name}>{name}</div>
-                        <div className={styles.description}>{description}</div>
-                        <div className={styles.tokenid}>{asset_contract ? asset_contract.address : hash} / {id}</div>
+                        {/* <div className={styles.description}>{description}</div> */}
+                        <div className={styles.tokenid}>{hash} / {token_id}</div>
                     </div>
                     </div>;
                 })}
