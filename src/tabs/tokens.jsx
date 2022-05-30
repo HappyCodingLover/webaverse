@@ -37,8 +37,12 @@ export const Tokens = ({userOpen, loginFrom, hacks, address}) => {
                     const {assets} = j;
                     // setNfts(assets);
 
+                    const bayc_polygon = '0xdB3f95e907dC8a02096aB2C2b994466b3B7424e8';
+                    const bayc_eth = '0xBC4CA0EdA7647A8aB7C2061c2E118A18a936f13D';
+                    const polygon_chain = 'polygon';
+                    const eth_chain = 'eth';
                     // Gets bored apes from main net via Moralis NFT API
-                    const res1 = await fetch(`https://deep-index.moralis.io/api/v2/nft/0xBC4CA0EdA7647A8aB7C2061c2E118A18a936f13D?chain=eth&format=decimal&limit=10
+                    const res1 = await fetch(`https://deep-index.moralis.io/api/v2/nft/${bayc_polygon}?chain=${polygon_chain}&format=decimal&limit=10
                     `, { headers: { 'X-API-KEY': 'H2SjTrwPQu29K2foKhDUP7d4e9JdNGpWZvNtzvK1IX8XKmgrEB8Q5ix35AzBnZdd', 'accept': 'application/json' } });
                     const boredApesResult = await res1.json();
                     const boredApes = boredApesResult.result;
@@ -113,8 +117,11 @@ export const Tokens = ({userOpen, loginFrom, hacks, address}) => {
         if (mynfts) {
             console.log('mynfts', mynfts);
             for (const nft of mynfts) {
+                // metadata
+                let metadata = JSON.parse(nft.metadata);
                 // generates ape image url
-                let imageUrl = 'https://ipfs.io/ipfs/' + JSON.parse(nft.metadata).image.slice(7);
+                // let imageUrl = 'https://ipfs.io/ipfs/' + metadata.image.slice(7);
+                let imageUrl = metadata.image;
                 if (!mynftPreviews[imageUrl]) {
                     mynftPreviews[imageUrl] = 'images/object.jpg';
                     fetch(imageUrl).then(response => response.blob()).then(imageBlob => {
@@ -126,6 +133,7 @@ export const Tokens = ({userOpen, loginFrom, hacks, address}) => {
                 }
             }
             setmyNftPreviews(mynftPreviews);
+            console.log('mynftPreviews', mynftPreviews);
         }
 
     });
@@ -141,8 +149,10 @@ export const Tokens = ({userOpen, loginFrom, hacks, address}) => {
         >
                 {(mynfts || []).map((nft, i) => {
                     // const {id, asset_contract, hash, name, description} = nft;
-                    const {token_id, name, hash} = nft;
-                    let imageUrl = 'https://ipfs.io/ipfs/' + JSON.parse(nft.metadata).image.slice(7);
+                    const {token_id, token_hash} = nft;
+                    // let imageUrl = 'https://ipfs.io/ipfs/' + JSON.parse(nft.metadata).image.slice(7);
+                    let metadata = JSON.parse(nft.metadata);
+                    const {image, name, description} = metadata;
 
                     // const image_preview_url = hacks.getNftImage(nft);
                     /* if (!image_preview_url) {
@@ -154,11 +164,11 @@ export const Tokens = ({userOpen, loginFrom, hacks, address}) => {
                     return <div className={styles.nft} onDragStart={e => {
                     e.dataTransfer.setData('application/json', JSON.stringify(nft));
                     }} draggable key={i}>
-                    <img src={mynftPreviews[imageUrl] || 'images/object.jpg'} className={styles.preview} />
+                    <img src={mynftPreviews[image] || 'images/object.jpg'} className={styles.preview} />
                     <div className={styles.wrap}>
                         <div className={styles.name}>{name}</div>
-                        {/* <div className={styles.description}>{description}</div> */}
-                        <div className={styles.tokenid}>{hash} / {token_id}</div>
+                        <div className={styles.description}>{description}</div>
+                        <div className={styles.tokenid}>{token_hash} / {token_id}</div>
                     </div>
                     </div>;
                 })}
