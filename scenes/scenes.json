@@ -13,7 +13,6 @@
   "silk-fountains.scn",
   "clockrealm.scn",
   "moon.scn",
-  "terrain.scn",
   "Space-station.scn",
   "sea.scn",
   "space-doodles.scn",
@@ -32,7 +31,12 @@
   "range.scn",
   "stage.scn",
   "theatre_Piano.scn",
+  "trigger.scn",
   "crypt.scn",
   "spacepod.scn",
-  "plaza.scn"
+  "plaza.scn",
+  "wind-sample.scn",
+  "snow-city.scn",
+  "traffic.scn",
+  "asteroids-game.scn"
 ]

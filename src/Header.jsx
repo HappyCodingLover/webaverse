@@ -14,6 +14,7 @@ import { Tokens } from './tabs/tokens';
 import { registerIoEventHandler, unregisterIoEventHandler } from './components/general/io-handler';
 import { AppContext } from './components/app';
 import { AvatarIcon } from './AvatarIcon';
+import { StoryTime } from './StoryTime';
 import { User } from './User';
 
 import styles from './Header.module.css';
@@ -262,6 +263,7 @@ export default function Header() {
               localPlayer={localPlayer}
               npcs={npcs}
             />
+            <StoryTime />
             {/* <div className={styles.inner}> */}
                 <UIMode hideDirection='left' >
                     <AvatarIcon />
@@ -290,6 +292,8 @@ export default function Header() {
                         claims={claims}
                         panelsRef={panelsRef}
                     /> */}
+                </div>
+                <div className={styles.panels}>
                     <Tokens
                         nfts={nfts}
                         hacks={hacks}
